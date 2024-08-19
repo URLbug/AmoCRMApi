@@ -13,25 +13,28 @@
     <div class="main-center">
         <div class="row">
             <div class="d-flex align-items-center flex-column">
-                <form action="">
+                <form action="{{ route('api') }}" method="POST">
+                    @csrf
+                    @method('POST')
+                    
                     <div class="form-group p-2">
                         <label for="name">Имя</label>
-                        <input class="form-control" id="name" type="text" placeholder="Ваше имя...">
+                        <input class="form-control" name="name" id="name" type="text" placeholder="Ваше имя...">
                     </div>
 
                     <div class="form-group p-2">
                         <label for="email">Почта</label>
-                        <input class="form-control" id="email" type="text" placeholder="Ваша почта...">
+                        <input class="form-control" name="email" id="email" type="text" placeholder="Ваша почта...">
                     </div>
 
                     <div class="form-group p-2">    
                         <label for="phone">Телефон</label>
-                        <input class="form-control" id="phone" type="phone" placeholder="Ваш номер телефона...">
+                        <input class="form-control" name="phone" id="phone" type="phone" placeholder="Ваш номер телефона...">
                     </div>
                     
                     <div class="form-group p-2">
                         <label for="price">Цена</label>
-                        <input class="form-control" id="price" type="text" placeholder="Цена...">
+                        <input class="form-control" name="price" id="price" type="text" placeholder="Цена...">
                     </div>
                     
                     <div class="form-group p-2 text-center">

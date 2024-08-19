@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('index');
-});
+Route::match(
+    ['get', 'post',],
+    '/', 
+    'App\Http\Controllers\ApiController@index'
+)->name('api');
