@@ -104,10 +104,12 @@ final class AmoCrm
         return $out;
     }
 
-    function get()
-    {
+    // function get()
+    // {
+    //     $link = 'https://' . $this->subDomain . '.amocrm.ru/api/v4'
 
-    }
+    //     $this->CurlRequest();
+    // }
 
     /**
      * @param bool $refresh
