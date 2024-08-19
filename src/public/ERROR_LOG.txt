@@ -1,0 +1,2 @@
+Ошибка: Not found
+Код ошибки: 404https://aaa603344.amocrm.ru/api/v4/note

@@ -1,7 +1,12 @@
 <?php
 
+use App\Api\AmoCrm;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    $amo = new AmoCrm;
+
+    dd($amo);
+
+    return view('index');
 });
