@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Api\AmoCrm;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -10,6 +11,13 @@ use Illuminate\Support\Facades\DB;
 
 class ClientController extends Controller
 {
+    private AmoCrm $amoCrm;
+
+    function __construct()
+    {
+        $this->amoCrm = new AmoCrm;
+    }
+
     /**
      * Метод для обработки запросов
      * 
@@ -40,6 +48,20 @@ class ClientController extends Controller
             'phone' => 'required|phone:RU',
             'price' => 'required|int|min:0',
         ]);
+
+        $contact = $this->amoCrm->addContact(
+            $data['name'],
+            $data['email'],
+            $data['phone'],
+        );
+
+        dd($contact);
+
+        $this->amoCrm->addLead(
+            $data['name'],
+            $data['price'],
+            $contact['id']
+        );
 
         return back()
         ->with('success', 'Успешно отправлено');

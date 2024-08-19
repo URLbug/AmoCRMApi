@@ -104,12 +104,59 @@ final class AmoCrm
         return $out;
     }
 
-    // function get()
-    // {
-    //     $link = 'https://' . $this->subDomain . '.amocrm.ru/api/v4'
+    /**
+     * @param string $name
+     * @param int $price
+     * @return string|bool
+     */
+    function addLead(string $name, int $price, ?int $contacts_id = null): string|bool
+    {
+        $link = 'https://' . $this->subDomain . '.amocrm.ru/api/v4/leads';
 
-    //     $this->CurlRequest();
-    // }
+        return $this->CurlRequest($link, 'POST', [
+            'name' => $name,
+            'price' => $price,
+            'contacts_id' => [$contacts_id, ],
+        ]);
+    }
+    /**
+     * @param string $name
+     * @param string $email
+     * @param string $phone
+     * @return string|bool
+     */
+    function addContact(string $name, string $email, string $phone): string|bool
+    {
+        $link = 'https://' . $this->subDomain . '.amocrm.ru/api/v4/contacts';
+
+        return $this->CurlRequest($link, 'POST', [
+            [
+               'name' => $name,
+               'custom_fields_values' => [
+                        [
+                            'field_code' => 'PHONE',
+                            'values' => [
+                                [
+                                    'value' => $phone,
+                                    'enum_code' => 'WORK'       
+                                ] ,
+                            ],
+                        ],
+                        [
+                            'field_code' => 'EMAIL',
+                            'values' => [
+                                [
+                                    'value' => $email,
+                                    'enum_code' => 'WORK'
+                                ],
+                            ],                        
+                        ],
+                        
+                    ],
+                ],
+            ],
+        );
+    }
 
     /**
      * @param bool $refresh
