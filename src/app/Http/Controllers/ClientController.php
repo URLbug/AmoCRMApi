@@ -94,7 +94,7 @@ class ClientController extends Controller
         ->with('success', 'Успешно создано');
     }
 
-    function IsMore30Second()
+    function IsMore30Second(): bool
     {
         $session = DB::table(config('session.table'))
         ->where('id', session()->getId())
