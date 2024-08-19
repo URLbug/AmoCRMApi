@@ -49,19 +49,19 @@ class ClientController extends Controller
             'price' => 'required|int|min:0',
         ]);
 
-        $contact = $this->amoCrm->addContact(
+        $contact = json_decode($this->amoCrm->addContact(
             $data['name'],
             $data['email'],
             $data['phone'],
-        );
+        ), true);
 
-        dd($contact);
-
-        $this->amoCrm->addLead(
+        $lead = $this->amoCrm->addLead(
             $data['name'],
             $data['price'],
-            $contact['id']
+            $contact['_embedded']['contacts'][0]['id']
         );
+
+        dd($lead);
 
         return back()
         ->with('success', 'Успешно отправлено');

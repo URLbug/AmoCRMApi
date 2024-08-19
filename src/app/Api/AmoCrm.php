@@ -114,9 +114,18 @@ final class AmoCrm
         $link = 'https://' . $this->subDomain . '.amocrm.ru/api/v4/leads';
 
         return $this->CurlRequest($link, 'POST', [
-            'name' => $name,
-            'price' => $price,
-            'contacts_id' => [$contacts_id, ],
+            [
+                'name' => $name,
+                'price' => $price,
+                '_embedded' => [
+                    'contacts' =>
+                    [
+                        [
+                            'id' => $contacts_id,
+                        ]
+                    ]
+                ],
+            ],
         ]);
     }
     /**
