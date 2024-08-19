@@ -1,2 +1,0 @@
-Ошибка: Bad request
-Код ошибки: 400https://aaa603344.amocrm.ru/oauth2/access_token
