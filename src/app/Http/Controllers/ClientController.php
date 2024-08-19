@@ -6,8 +6,9 @@ use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
-class ApiController extends Controller
+class ClientController extends Controller
 {
     /**
      * Метод для обработки запросов
@@ -42,5 +43,12 @@ class ApiController extends Controller
 
         return back()
         ->with('success', 'Успешно отправлено');
+    }
+
+    function last_activity()
+    {
+        return DB::table(config('session.table'))->get([
+            'sessions.last_activity'
+        ]);
     }
 }

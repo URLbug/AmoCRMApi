@@ -13,10 +13,10 @@
     <div class="main-center">
         <div class="row">
             <div class="d-flex align-items-center flex-column">
-                <form action="{{ route('api') }}" method="POST">
+                <form action="{{ route('client') }}" method="POST">
                     @csrf
                     @method('POST')
-                    
+
                     <div class="form-group p-2">
                         <label for="name">Имя</label>
                         <input class="form-control" name="name" id="name" type="text" placeholder="Ваше имя...">
@@ -35,6 +35,16 @@
                     <div class="form-group p-2">
                         <label for="price">Цена</label>
                         <input class="form-control" name="price" id="price" type="text" placeholder="Цена...">
+                    </div>
+
+                    <div class="form-group p-2 text-center">
+                        @if(Session::has('success'))
+                            <p style="color: green">{{ Session::get('success') }}</p>
+                        @endif
+
+                        @if($errors->any())
+                            <p style="color: red">{{ $errors->first() }}</p>
+                        @endif
                     </div>
                     
                     <div class="form-group p-2 text-center">
