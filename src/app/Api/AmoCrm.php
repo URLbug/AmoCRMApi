@@ -107,13 +107,13 @@ final class AmoCrm
     /**
      * @param string $name
      * @param int $price
-     * @return string|bool
+     * @return array|bool
      */
-    function addLead(string $name, int $price, ?int $contacts_id = null): string|bool
+    function addLead(string $name, int $price, ?int $contacts_id = null): array|bool
     {
         $link = 'https://' . $this->subDomain . '.amocrm.ru/api/v4/leads';
 
-        return $this->CurlRequest($link, 'POST', [
+        return json_decode($this->CurlRequest($link, 'POST', [
             [
                 'name' => $name,
                 'price' => $price,
@@ -126,19 +126,19 @@ final class AmoCrm
                     ]
                 ],
             ],
-        ]);
+        ]), true);
     }
     /**
      * @param string $name
      * @param string $email
      * @param string $phone
-     * @return string|bool
+     * @return array|bool
      */
-    function addContact(string $name, string $email, string $phone): string|bool
+    function addContact(string $name, string $email, string $phone): array|bool
     {
         $link = 'https://' . $this->subDomain . '.amocrm.ru/api/v4/contacts';
 
-        return $this->CurlRequest($link, 'POST', [
+        return json_decode($this->CurlRequest($link, 'POST', [
             [
                'name' => $name,
                'custom_fields_values' => [
@@ -164,7 +164,7 @@ final class AmoCrm
                     ],
                 ],
             ],
-        );
+        ), true);
     }
 
     /**
