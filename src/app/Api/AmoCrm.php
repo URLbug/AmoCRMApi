@@ -12,7 +12,7 @@ final class AmoCrm
     private string $code;
     private string $redirect_uri;
     private string $access_token;
-    
+
     private string $token_file = 'TOKEN.txt';
 
     function __construct()
@@ -25,16 +25,16 @@ final class AmoCrm
         
         if(file_exists($this->token_file)) 
         {
-            $expires_in = json_decode(file_get_contents("TOKEN.txt"))->{'expires_in'};
+            $expires_in = json_decode(file_get_contents($this->token_file))->{'expires_in'};
             
             if($expires_in < time()) 
             {
-                $this->access_token = json_decode(file_get_contents("TOKEN.txt"))->{'access_token'};
+                $this->access_token = json_decode(file_get_contents($this->token_file))->{'access_token'};
                 $this->GetToken(true);
             }
             else
             {
-                $this->access_token = json_decode(file_get_contents("TOKEN.txt"))->{'access_token'};
+                $this->access_token = json_decode(file_get_contents($this->token_file))->{'access_token'};
             }
         }
         else
@@ -57,29 +57,39 @@ final class AmoCrm
         /** 
          * Формируем заголовки 
          */
-        $headers = [
-            'Authorization: Bearer ' . $this->access_token,
-            'Content-Type: application/json'
-        ];
+        if(isset($this->access_token))
+        { 
+            $headers = [
+                'Authorization: Bearer ' . $this->access_token,
+                'Content-Type: application/json'
+            ];
+        }
 
         $curl = curl_init();
         
         /**
          * Настройка
          */
-        curl_setopt($curl,CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl,CURLOPT_USERAGENT,'amoCRM-oAuth-client/1.0');
-        curl_setopt($curl,CURLOPT_HTTPHEADER,['Content-Type:application/json']);
-        curl_setopt($curl,CURLOPT_URL, $link);
-        
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_USERAGENT, 'amoCRM-oAuth-client/1.0');
+        curl_setopt($curl, CURLOPT_HTTPHEADER, ['Content-Type:application/json']);
+        curl_setopt($curl, CURLOPT_URL, $link);
+        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
+
         if($method == 'POST' || $method == 'PATCH') 
         {
-            curl_setopt($curl ,CURLOPT_POSTFIELDS, json_encode($data));
+            curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
         }
-        
-        curl_setopt($curl,CURLOPT_CUSTOMREQUEST, $method);
-        curl_setopt($curl,CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($curl,CURLOPT_HEADER, false);
+                
+        if(isset($this->access_token))
+        {
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        }
+        else
+        {
+            curl_setopt($curl, CURLOPT_HEADER, false);
+        }
+
         curl_setopt($curl,CURLOPT_SSL_VERIFYPEER, 1);
         curl_setopt($curl,CURLOPT_SSL_VERIFYHOST, 2);
         
@@ -112,9 +122,19 @@ final class AmoCrm
             'client_id' => $this->client_id,
             'client_secret' => $this->client_secret,
             'grant_type' => $refresh ? 'refresh_token' : 'authorization_code',
-            'refresh_token' => $refresh ? json_decode(file_get_contents("TOKEN.txt"))->{'refresh_token'} : $this->code,
             'redirect_uri' => $this->redirect_uri
         ];
+
+        if($refresh)
+        {
+            $data['refresh_token'] = json_decode(
+                file_get_contents($this->token_file)
+            )->{'refresh_token'};
+        }
+        else
+        {
+            $data['code'] = $this->code;
+        }
 
         $out = $this->CurlRequest($link, 'POST', $data);
 
