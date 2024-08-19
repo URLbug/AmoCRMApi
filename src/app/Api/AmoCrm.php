@@ -134,7 +134,7 @@ final class AmoCrm
      * @param string $phone
      * @return array|bool
      */
-    function addContact(string $name, string $email, string $phone): array|bool
+    function addContact(string $name, string $email, string $phone, bool $isMore): array|bool
     {
         $link = 'https://' . $this->subDomain . '.amocrm.ru/api/v4/contacts';
 
@@ -160,6 +160,14 @@ final class AmoCrm
                                 ],
                             ],                        
                         ],
+                        [
+                            'field_id' => (int)env('CUSTOM'),
+                            'values' => [
+                                [
+                                    'value' => (int)$isMore,
+                                ]
+                            ]
+                        ]
                         
                     ],
                 ],

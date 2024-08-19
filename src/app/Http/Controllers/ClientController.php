@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Api\AmoCrm;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -42,18 +43,46 @@ class ClientController extends Controller
      */
     function store(Request $request): RedirectResponse
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email',
-            'phone' => 'required|phone:RU',
-            'price' => 'required|int|min:0',
-        ]);
+        $data = Validator::make(
+            $request->all(),
+            [
+                'name' => 'required|string|max:255',
+                'email' => 'required|email',
+                'phone' => 'required|phone:RU',
+                'price' => 'required|int|min:0',
+            ], 
+            [
+                'name.required' => 'Поле "Имя" обязательно для заполнения',
+                'email.required' => 'Поле "Email" обязательно для заполнения',
+                'phone.required' => 'Поле "Телефон" обязательно для заполнения',
+                'price.required' => 'Поле "Цена" обязательно для заполнения',
+                'name.max' => 'Поле "Имя" должно быть не более 255 символов',
+                'email.email' => 'Поле "Email" должно быть в формате email',
+                'phone.phone' => 'Поле "Телефон" должно быть в формате РФ номера телефона',
+                'price.min' => 'Поле "Цена" должно быть не менее 0',
+                'price.integer' => 'Поле "Цена" должно быть числовым типом',
+            ]
+        );
+
+        if($data->fails())
+        {
+            return back()->withErrors($data);
+        }
+
+        $data = $data->getData();
 
         $contact = $this->amoCrm->addContact(
             $data['name'],
             $data['email'],
             $data['phone'],
+            $this->IsMore30Second()
         );
+
+        if(isset($contact['status']) && $contact['status'] == 400)
+        {
+            return back()
+            ->withErrors('Неудалось отправить заявку');
+        }
 
         $this->amoCrm->addLead(
             $data['name'],
@@ -65,10 +94,13 @@ class ClientController extends Controller
         ->with('success', 'Успешно создано');
     }
 
-    function last_activity()
+    function IsMore30Second()
     {
-        return DB::table(config('session.table'))->get([
-            'sessions.last_activity'
-        ]);
+        $session = DB::table(config('session.table'))
+        ->where('id', session()->getId())
+        ->where('last_activity',  '>', Carbon::now()->subSeconds(30)->getTimestamp())
+        ->first();
+
+        return isset($session);
     }
 }
