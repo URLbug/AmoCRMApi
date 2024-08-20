@@ -36,13 +36,14 @@ class ClientController extends Controller
     }
 
     /**
-     * Метод для созданий сделок
+     * Метод для создании заявки
      * 
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\RedirectResponse
      */
     function store(Request $request): RedirectResponse
     {
+        // Валидирую данные
         $data = Validator::make(
             $request->all(),
             [
@@ -64,6 +65,7 @@ class ClientController extends Controller
             ]
         );
 
+        // Если присутствует ошибка, то отправляю ее пользователю
         if($data->fails())
         {
             return back()->withErrors($data);
@@ -71,19 +73,22 @@ class ClientController extends Controller
 
         $data = $data->getData();
 
+        // Создаю данные для контакта
         $contact = $this->amoCrm->addContact(
             $data['name'],
             $data['email'],
             $data['phone'],
-            $this->IsMore30Second()
+            $this->IsMore30Second() // Если человек на сайте более 30 секунд, то тоже отправляю данные
         );
 
-        if(isset($contact['status']) && $contact['status'] == 400)
+        // Если в запросе есть ошибка, то отправляю обратно ответ
+        if(isset($contact['status']))
         {
             return back()
             ->withErrors('Неудалось отправить заявку');
         }
 
+        // Создаю сделку с контактом
         $this->amoCrm->addLead(
             $data['name'],
             $data['price'],
@@ -94,13 +99,20 @@ class ClientController extends Controller
         ->with('success', 'Успешно создано');
     }
 
+    /**
+     * Метод для проверки длительности на сайте
+     * 
+     * @return bool
+     */
     function IsMore30Second(): bool
     {
+        // Проверка последний активности у пользователя
         $session = DB::table(config('session.table'))
         ->where('id', session()->getId())
         ->where('last_activity',  '>', Carbon::now()->subSeconds(30)->getTimestamp())
         ->first();
 
+        // Если такая сессия есть, то true, иначе false
         return isset($session);
     }
 }

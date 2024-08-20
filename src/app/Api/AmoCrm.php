@@ -25,12 +25,13 @@ final class AmoCrm
         
         if(file_exists($this->token_file)) 
         {
+            // Через сколько будет исчезнит токен
             $expires_in = json_decode(file_get_contents($this->token_file))->{'expires_in'};
             
             if($expires_in < time()) 
             {
                 $this->access_token = json_decode(file_get_contents($this->token_file))->{'access_token'};
-                $this->GetToken(true);
+                $this->GetToken(true); // Обновляем токен если время истекло
             }
             else
             {
@@ -39,7 +40,7 @@ final class AmoCrm
         }
         else
         {
-            $this->GetToken();
+            $this->GetToken(); // Получаем токен если его нету
         }
     }   
 
@@ -53,7 +54,7 @@ final class AmoCrm
         string $link, 
         string $method, 
         array $data=[]
-    ): string|bool {
+    ): string {
         /** 
          * Формируем заголовки 
          */
@@ -70,7 +71,7 @@ final class AmoCrm
         /**
          * Настройка
          */
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); // Молчит об ошибки
         curl_setopt($curl, CURLOPT_USERAGENT, 'amoCRM-oAuth-client/1.0');
         curl_setopt($curl, CURLOPT_HTTPHEADER, ['Content-Type:application/json']);
         curl_setopt($curl, CURLOPT_URL, $link);
@@ -87,11 +88,11 @@ final class AmoCrm
         }
         else
         {
-            curl_setopt($curl, CURLOPT_HEADER, false);
+            curl_setopt($curl, CURLOPT_HEADER, false); 
         }
 
-        curl_setopt($curl,CURLOPT_SSL_VERIFYPEER, 1);
-        curl_setopt($curl,CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 1);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
         
         $out = curl_exec($curl); // Инициируем запрос к API и сохраняем ответ в переменную
         
@@ -105,11 +106,13 @@ final class AmoCrm
     }
 
     /**
+     * Создание сделки
+     * 
      * @param string $name
      * @param int $price
-     * @return array|bool
+     * @return array
      */
-    function addLead(string $name, int $price, ?int $contacts_id = null): array|bool
+    function addLead(string $name, int $price, ?int $contacts_id = null): array
     {
         $link = 'https://' . $this->subDomain . '.amocrm.ru/api/v4/leads';
 
@@ -128,13 +131,16 @@ final class AmoCrm
             ],
         ]), true);
     }
+
     /**
+     * Создание контакта
+     * 
      * @param string $name
      * @param string $email
      * @param string $phone
-     * @return array|bool
+     * @return array
      */
-    function addContact(string $name, string $email, string $phone, bool $isMore): array|bool
+    function addContact(string $name, string $email, string $phone, bool $isMore): array
     {
         $link = 'https://' . $this->subDomain . '.amocrm.ru/api/v4/contacts';
 
@@ -176,14 +182,17 @@ final class AmoCrm
     }
 
     /**
+     * Получение и сброс токена
+     * 
      * @param bool $refresh
      * @return void
      */
     private function GetToken(bool $refresh = false): void
     {
-        $link = 'https://' . $this->subDomain . '.amocrm.ru/oauth2/access_token'; //Формируем URL для запроса
+        // Формируем URL для запроса
+        $link = 'https://' . $this->subDomain . '.amocrm.ru/oauth2/access_token'; 
 
-        /** Соберем данные для запроса */
+        // Соберем данные для запроса
         $data = [
             'client_id' => $this->client_id,
             'client_secret' => $this->client_secret,
@@ -191,6 +200,7 @@ final class AmoCrm
             'redirect_uri' => $this->redirect_uri
         ];
 
+        // Проверяем есть ли токен. Если нет исполбзуем код
         if($refresh)
         {
             $data['refresh_token'] = json_decode(
@@ -223,6 +233,8 @@ final class AmoCrm
     }
 
     /**
+     * Проверка на ошибку в обратном запросе
+     * 
      * @param string $code
      * @param string $link
      * @throws \Exception
@@ -257,6 +269,12 @@ final class AmoCrm
          }
     }
 
+    /**
+     * Запись логов об ошибки
+     * 
+     * @param string $e
+     * @return void
+     */
     private function error(string $e): void
     {
         file_put_contents('ERROR_LOG.txt', $e);
